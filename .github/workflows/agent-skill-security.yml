@@ -1,0 +1,39 @@
+# Scan the maintained Agent Skills marketplace without network access or submission.
+name: Agent skill security scan
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+      - '.github/workflows/agent-skill-security.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  agent-skill-security:
+    name: Scan maintained Agent Skills
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Scan skills offline
+        uses: hashgraph-online/ai-plugin-scanner-action@4a44de6c18b68ec258fcc3e0cec5261fc8ea63fd
+        with:
+          mode: scan
+          plugin_dir: skills
+          profile: default
+          format: text
+          online: 'false'
+          upload_sarif: 'false'
+          cisco_skill_scan: 'off'
+          min_score: '80'
+          fail_on_severity: high
+          submission_enabled: 'false'
+          pr_comment: 'off'
+          write_step_summary: 'true'
